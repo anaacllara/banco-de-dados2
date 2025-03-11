@@ -1,4 +1,4 @@
 --Aula 11/03/2025 
 -- Professor Molina 
 
--- Comando SELECT 
+-- Comando SELECT com WHERE	
