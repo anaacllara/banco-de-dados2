@@ -1,5 +1,5 @@
 # BANCO DE DADOS
-## Este repositório contêm atividades realizadas em SQL em sala de aula e o Sistema de Gerenciamento de Biblioteca, direcionado a universidades. 
+## Este repositório contêm atividades realizadas em SQL em sala de aula e o Sistema de Gerenciamento de Biblioteca, direcionado a universidades, criado sujeito à avaliação do professor. 
 Neste README.md, a documentação mais detalhada do SGBiblioteca está na sua pasta. 
 
 ---
