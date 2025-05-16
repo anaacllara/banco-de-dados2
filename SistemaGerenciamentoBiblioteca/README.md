@@ -2,7 +2,7 @@
 
 ## 1. Objetivo do Sistema de Gerenciamento de Biblioteca
 É um sistema para universidades. Ele registra informações sobre livros, autores, usuários, empréstimos, reservas, histórico de empréstimos e devoluções. 
-Além de possui usuários criados em servidor Linux Ubuntu, para garantir segurança e permissões de acessos
+Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts, para garantir segurança e permissões de acessos. 
 
 ---
 
@@ -35,51 +35,95 @@ Além de possui usuários criados em servidor Linux Ubuntu, para garantir segura
 
 | Coluna         | Tipo          | Descrição                  | Restrições                |
 |----------------|---------------|----------------------------|----------------------------|
-| cod     | VARCHAR(20)           | Identificador do livro por categoria        | PK, NOT NULL         |
-| descricao           | VARCHAR(250)  | Descreve em qual classe o livro pertence              | NOT NULL                   |
-
+| cod            | VARCHAR(20)   | Identificador do livro por categoria        | PK, NOT NULL |
+| descricao      | VARCHAR(250)  | Descreve em qual classe o livro pertence    | NOT NULL     |
 
 ---
-
-#### 🗂️ Tabela: `produtos`
-**Descrição:** Armazena os produtos disponíveis.
+#### 🗂️ Tabela: `livro`
+**Descrição:** Armazena os dados dos livros.
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id_produto    | INT           | Identificador do produto | PK, AUTO_INCREMENT |
-| nome          | VARCHAR(100)  | Nome do produto         | NOT NULL           |
-| preco         | DECIMAL(10,2) | Preço unitário          | NOT NULL           |
-| estoque       | INT           | Quantidade em estoque   | DEFAULT 0          |
+| id            | INT           | Identificador do livro | PK, AUTO_INCREMENT, UNIQUE |
+| cdd_cod       | VARCHAR(20)   | Chave estrangeira da tabela cdd         | FK, NOT NULL           |
+| isbn          | VARCHAR(14)   | Padrão internacional de numeração de livros          | UNIQUE           |
+| titulo        | VARCHAR(500)  | Título do Livro   | NOT NULL                 |
+| ano_publicacao| DATE          | Ano da Publicaçao do Livro | NOT NULL|
+| disponibilidade| TINYINT(1)   | Disponibilidade do Livro (TRUE/FALSE)| NOT NULL|
+| edicao        | SMALLINT      | Edição do Livro        | NOT NULL           |
+| editora       | VARCHAR(200)  | Editora do Livro       | DEFALUT/EXPRESSION ('autopublicacao')|
 
-*(Repita para outras tabelas como pedidos, itens_pedido, etc.)*
+---
+#### 🗂️ Tabela: `autor`
+**Descrição:** Armazena os dados dos autores.
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id            | INT           | Identificador do autor | PK, AUTO_INCREMENT, UNIQUE |
+| nome          | VARCHAR(250)  | Nome do Autor          | NOT NULL            |
+| nascionalidade| VARCHAR(100)  | Nascionalidade do Autor| NOT NULL            |
+| dt_nascimento | DATE          | Data de nascimento do Autor   | NOT NULL     |
+
+---
+#### 🗂️ Tabela de Relacionamento: `livro_autor`
+**Descrição:** Tabela de Relacionamento entre as tabelas "livro" e "autor"
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id_livro      | INT           | Chave estrangeira da tabela Livro | FK |
+| id_autor      | INT           | Chave estrangeira da tabela Autor | FK |
+
+---
+#### 🗂️ Tabela: `emprestimo`
+**Descrição:** Armazena os dados dos empréstimos dos livros.
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id            | INT           | Identificador do Empréstimo | PK, AUTO_INCREMENT, UNIQUE |
+| usuario_id    | INT           | Chave estrangeira da tabela Usuário | FK, NOT NULL |
+| livro_id      | INT           | Chave estrangeira da tabela Livro   | FK, NOT NULL|
+| dt_emprestimo | DATE          | Data do empréstimo do livro | NOT NULL       |
+| dt_devolucao_prevista| DATE   | Data da devolução prevista | NOT NULL|
+| dt_devolucao_real| DATE       | Data devolução real, se houver renovação do emprestimo   | NOT NULL|
+| status        | ENUM('em andamento', 'devolvido', 'renovado', 'atrasado')| Situação que se encontra o empréstimo do livro | NOT NULL |
+| observação    | VARCHAR(250)  | Observação sobre o estado do livro antes e depois do empréstimo | NOT NULL |
+| multa         | DECIMAL(6,2)  | Multa a ser aplicada caso haja atraso | DEFAULT/EXPRESSION 0.00 |
+
+---
+#### 🗂️ Tabela: `usuário`
+**Descrição:** Armazena os dados dos usuários que utilizam o sistema da biblioteca.
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id            | INT           | Identificador do usuário| PK, AUTO_INCREMENT, UNIQUE |
+| nome          | VARCHAR(200)  | Nome do Usuário        | NOT NULL            |
+| email         | VARCHAR(200)  | Email do Usuário       | NOT NULL, UNIQUE    |
+| telefone      | VARCHAR(15)   | Número de telefone do Usuári | NOT NULL, UNIQUE |
+| dt_cadastro   | DATE          | Data do Cadastro do Usuário | NOT NULL, CURRENT_DATE|
+| cargo         | ENUM(estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor')| Ocupação do usuário | NOT NULL|
+
+---
+#### 🗂️ Tabela: `reserva`
+**Descrição:** Armazena os dados sobre reservas de livros.
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id            | INT           | Identificador da reserva| PK, AUTO_INCREMENT, UNIQUE |
+| livro_id      | INT           | Chave estrangeira da tabela livro | FK, NOT NULL|
+| usuario_id    | INT           | Chave estrangeira da tabela usuario | FK, NOT NULL |
+| dt_reserva    | DATE          | Data em que a reserva foi efetuada   | NOT NULL  |
+| status        | ENUM('ativa', 'efetivada', 'expirada', 'cancelada', 'sem reserva')| Status da reserva| NOT NULL|
+| dt_expiracao  | DATE          | Data em que a reserva expira| NOT NULL|
 
 ---
 
 ## 4. Regras de Negócio
 - Um autor pode ter vários livros
 - Um livro pode ter vários autores
+- O sistema deve fornecer opções para autor que se autopublicou
 - Alunos de Graduação da Instituição podem pegar até 4 livros por 2 semanas, com direito a uma renovação
 - Estudantes de fora da Instituição podem pegar até 2 livros por 2 semanas, com direito a uma renovação
 - Professores, alunos de pós-graduação e funcionários podem pegar até 5 livros por 2 semanas, com direito a duas renovações. 
 - Ao reservar um livro, o prazo limite para realizar o empréstimo é de 3 dias úteis.
 
 ---
-
-## 5. Script de Criação
-```sql
-CREATE TABLE clientes (
-    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    data_cadastro DATE DEFAULT CURRENT_DATE
-);
-
-CREATE TABLE produtos (
-    id_produto INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    preco DECIMAL(10,2) NOT NULL,
-    estoque INT DEFAULT 0
-);
--- Demais scripts aqui
-
-[def]: istemaGerenciamen
