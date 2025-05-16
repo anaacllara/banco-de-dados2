@@ -50,7 +50,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | titulo        | VARCHAR(500)  | Título do Livro   | NOT NULL                 |
 | ano_publicacao| DATE          | Ano da Publicaçao do Livro | NOT NULL|
 | disponibilidade| TINYINT(1)   | Disponibilidade do Livro (TRUE/FALSE)| NOT NULL|
-| edicao        | SMALLINT      | Edição do Livro        | NOT NULL           |
+| edicao        | SMALLINT(2)    | Edição do Livro        | NOT NULL           |
 | editora       | VARCHAR(200)  | Editora do Livro       | DEFALUT/EXPRESSION ('autopublicacao')|
 
 ---
@@ -74,33 +74,34 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | id_autor      | INT           | Chave estrangeira da tabela Autor | FK |
 
 ---
-#### 🗂️ Tabela: `emprestimo`
-**Descrição:** Armazena os dados dos empréstimos dos livros.
-
-| Coluna        | Tipo          | Descrição              | Restrições         |
-|---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador do Empréstimo | PK, AUTO_INCREMENT, UNIQUE |
-| usuario_id    | INT           | Chave estrangeira da tabela Usuário | FK, NOT NULL |
-| livro_id      | INT           | Chave estrangeira da tabela Livro   | FK, NOT NULL|
-| dt_emprestimo | DATE          | Data do empréstimo do livro | NOT NULL       |
-| dt_devolucao_prevista| DATE   | Data da devolução prevista | NOT NULL|
-| dt_devolucao_real| DATE       | Data devolução real, se houver renovação do emprestimo   | NOT NULL|
-| status        | ENUM('em andamento', 'devolvido', 'renovado', 'atrasado')| Situação que se encontra o empréstimo do livro | NOT NULL |
-| observação    | VARCHAR(250)  | Observação sobre o estado do livro antes e depois do empréstimo | NOT NULL |
-| multa         | DECIMAL(6,2)  | Multa a ser aplicada caso haja atraso | DEFAULT/EXPRESSION 0.00 |
-
----
 #### 🗂️ Tabela: `usuário`
 **Descrição:** Armazena os dados dos usuários que utilizam o sistema da biblioteca.
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador do usuário| PK, AUTO_INCREMENT, UNIQUE |
+| id            | INT           | Identificador do usuário| PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
 | nome          | VARCHAR(200)  | Nome do Usuário        | NOT NULL            |
 | email         | VARCHAR(200)  | Email do Usuário       | NOT NULL, UNIQUE    |
 | telefone      | VARCHAR(15)   | Número de telefone do Usuári | NOT NULL, UNIQUE |
 | dt_cadastro   | DATE          | Data do Cadastro do Usuário | NOT NULL, CURRENT_DATE|
-| cargo         | ENUM(estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor')| Ocupação do usuário | NOT NULL|
+| cargo         | ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor')| Ocupação do usuário | NOT NULL|
+
+---
+#### 🗂️ Tabela: `emprestimo`
+**Descrição:** Armazena os dados dos empréstimos dos livros.
+
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| id            | INT           | Identificador do Empréstimo | PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
+| usuario_id    | INT           | Chave estrangeira da tabela Usuário | FK, NOT NULL |
+| livro_id      | INT           | Chave estrangeira da tabela Livro   | FK, NOT NULL|
+| dt_emprestimo | DATETIME      | Data do empréstimo do livro | NOT NULL       |
+| dt_devolucao_prevista| DATETIME   | Data da devolução prevista | NOT NULL|
+| dt_devolucao_real| DATETIME   | Data devolução real, se houver renovação do emprestimo   | NOT NULL|
+| status        | ENUM('em andamento', 'devolvido', 'renovado', 'atrasado')| Situação que se encontra o empréstimo do livro | NOT NULL |
+| observação    | VARCHAR(250)  | Observação sobre o estado do livro antes e depois do empréstimo | NOT NULL |
+| multa         | DECIMAL(6,2)  | Multa a ser aplicada caso haja atraso | DEFAULT/EXPRESSION 0.00 |
+| renovacao     | INT           | Número de vezes que o empréstimo foi renovado | NOT NULL, DEFAULT 0 | 
 
 ---
 #### 🗂️ Tabela: `reserva`
@@ -108,15 +109,24 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador da reserva| PK, AUTO_INCREMENT, UNIQUE |
+| id            | INT           | Identificador da reserva| PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
 | livro_id      | INT           | Chave estrangeira da tabela livro | FK, NOT NULL|
 | usuario_id    | INT           | Chave estrangeira da tabela usuario | FK, NOT NULL |
 | dt_reserva    | DATE          | Data em que a reserva foi efetuada   | NOT NULL  |
 | status        | ENUM('ativa', 'efetivada', 'expirada', 'cancelada', 'sem reserva')| Status da reserva| NOT NULL|
-| dt_expiracao  | DATE          | Data em que a reserva expira| NOT NULL|
+| dt_expiracao  | DATETIME      | Data em que a reserva expira| NOT NULL|
 
 ---
+#### 🗂️ Tabela: `regra_usuario`
+**Descrição:** Armazena regras de negócios dos usuários e auxilia na criação de triggers.
 
+| Coluna        | Tipo          | Descrição              | Restrições         |
+|---------------|---------------|------------------------|---------------------|
+| cargo         | ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor') | Identificador das regras| PK |
+| max_livros    | INT           | Quantidade máxima de livros que podem ser emprestados | NOT NULL|
+| max_renovacoes| INT           | Qauntidade máxima de renovações que um usuário pode efetuar | NOT NULL |
+
+---
 ## 4. Regras de Negócio
 - Um autor pode ter vários livros
 - Um livro pode ter vários autores
