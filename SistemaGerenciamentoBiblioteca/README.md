@@ -1,4 +1,4 @@
-# 📘 Documentação do Banco de Dados
+# Documentação do Banco de Dados
 
 ## 1. Objetivo do Sistema de Gerenciamento de Biblioteca
 É um sistema para universidades. Ele registra informações sobre livros, autores, usuários, empréstimos, reservas, histórico de empréstimos e devoluções. 
@@ -26,7 +26,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 ## 3. Modelagem de Dados
 
 ### 3.1 Diagrama Entidade-Relacionamento (ER)
-> <img src="SistemaGerenciamentoBiblioteca\Diagrama Entidade-Relacionamento.png" alt="Diagrama Sistema de Gerenciamento Biblioteca">
+> <img src="/SistemaGerenciamentoBiblioteca/Diagrama ER.png" alt="Diagrama Sistema de Gerenciamento Biblioteca">
 
 ### 3.2 Descrição das Tabelas
 
@@ -51,7 +51,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | ano_publicacao| DATE          | Ano da Publicaçao do Livro | NOT NULL|
 | disponibilidade| TINYINT(1)   | Disponibilidade do Livro (TRUE/FALSE)| NOT NULL|
 | edicao        | SMALLINT(2)    | Edição do Livro        | NOT NULL           |
-| editora       | VARCHAR(200)  | Editora do Livro       | DEFALUT/EXPRESSION ('autopublicacao')|
+| editora       | VARCHAR(200)  | Editora do Livro       | NOT NULL, DEFALUT/EXPRESSION ('autopublicacao')|
 
 ---
 #### 🗂️ Tabela: `autor`
@@ -83,7 +83,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | nome          | VARCHAR(200)  | Nome do Usuário        | NOT NULL            |
 | email         | VARCHAR(200)  | Email do Usuário       | NOT NULL, UNIQUE    |
 | telefone      | VARCHAR(15)   | Número de telefone do Usuári | NOT NULL, UNIQUE |
-| dt_cadastro   | DATE          | Data do Cadastro do Usuário | NOT NULL, CURRENT_DATE|
+| dt_cadastro   | DATE          | Data do Cadastro do Usuário | NOT NULL|
 | cargo         | ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor')| Ocupação do usuário | NOT NULL|
 
 ---
@@ -127,13 +127,24 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | max_renovacoes| INT           | Qauntidade máxima de renovações que um usuário pode efetuar | NOT NULL |
 
 ---
-## 4. Regras de Negócio
+### ⚠️ Triggers 
+### Tabela `emprestimo`
+#### trg_bloquear_multa
+> **Objetivo:** Impedir que um usuário com multa pendente realize empréstimo. 
+>**Tipo:** BEFORE INSERT 
+
+#### trg_limite_emprestimo
+> **Objetivo:** Verifica se o usuário já atingiu o limite de empréstimos.  
+>**Tipo:** BEFORE INSERT
+
+---
+## 💼 4. Regras de Negócio
 - Um autor pode ter vários livros
 - Um livro pode ter vários autores
 - O sistema deve fornecer opções para autor que se autopublicou
+- Usuários com multa ativa não devem realizar empréstimos
 - Alunos de Graduação da Instituição podem pegar até 4 livros por 2 semanas, com direito a uma renovação
 - Estudantes de fora da Instituição podem pegar até 2 livros por 2 semanas, com direito a uma renovação
 - Professores, alunos de pós-graduação e funcionários podem pegar até 5 livros por 2 semanas, com direito a duas renovações. 
-- Ao reservar um livro, o prazo limite para realizar o empréstimo é de 3 dias úteis.
 
 ---

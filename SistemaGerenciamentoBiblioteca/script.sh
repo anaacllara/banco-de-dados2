@@ -30,7 +30,7 @@ GRANT SELECT, INSERT, UPDATE ON sgBiblioteca.* TO 'desenvolvedor'@'localhost';
 GRANT ALL PRIVILEGES ON sgBiblioteca.* TO 'adm_bd'@'localhost';
 FLUSH PRIVILEGES;
 
---criar tabelas 
+-- criar tabelas 
 CREATE TABLE cdd(
     cod VARCHAR(20) PRIMARY KEY NOT NULL,
     descricao VARCHAR(250) NOT NULL
@@ -38,7 +38,7 @@ CREATE TABLE cdd(
 
 CREATE TABLE livro(
     id INT PRIMARY KEY AUTO_INCREMENT UNIQUE,
-    cdd_cod VARCHAR(20), 
+    cdd_cod VARCHAR(20) NOT NULL, 
     isbn VARCHAR(14) UNIQUE,
     titulo VARCHAR(500) NOT NULL, 
     ano_publicacao DATE NOT NULL, 
@@ -67,12 +67,12 @@ CREATE TABLE usuario(
     nome VARCHAR(200) NOT NULL, 
     email VARCHAR(200) NOT NULL UNIQUE,
     telefone VARCHAR(15) NOT NULL UNIQUE,
-    dt_cadastro DATE NOT NULL DEFAULT CURRENT_DATE, 
+    dt_cadastro DATE NOT NULL, 
     cargo ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor') NOT NULL
 );
 
 CREATE TABLE emprestimo(
-    id INT PRIMARY KEY AUTO_INCREMENT UNIQUE
+    id INT PRIMARY KEY AUTO_INCREMENT UNIQUE,
     usuario_id INT NOT NULL, 
     livro_id INT NOT NULL,
     dt_emprestimo DATE NOT NULL, 
@@ -95,5 +95,54 @@ CREATE TABLE reserva(
     FOREIGN KEY (livro_id) REFERENCES livro(id),
     FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
+
+-- criar trigger para impedir empréstimo se tiver multa
+DELIMITER // 
+CREATE TRIGGER trg_bloquear_multa
+BEFORE INSERT ON emprestimo
+FOR EACH ROW 
+BEGIN 
+    DECLARE multa_usuario DECIMAL(6,2) DEFAULT 0;
+    SELECT SUM(multa) INTO multa_usuario
+    FROM emprestimo 
+    WHERE usuario_id = NEW.usuario_id AND multa> 0;
+
+    IF multa_usuario IS NOT NULL AND multa_usuario > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário com multa pendente não realiza empréstimo!'; 
+    END IF;
+END;
+//
+DELIMITER ; 
+
+-- regras de empréstimo para cada tipo de usuário 
+DELIMITER //
+CREATE TRIGGER trg_limite_emprestimo
+BEFORE INSERT ON emprestimo 
+FOR EACH ROW 
+BEGIN 
+    DECLARE qtd INT DEFAULT 0;
+    DECLARE limite INT DEFAULT 0;
+    DECLARE tipo_usuario ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor');
+
+    SELECT COUNT(*) INTO qtd FROM emprestimo
+    WHERE usuario_id = NEW.usuario_id AND status IN ('em andamento', 'renovado');
+
+    SELECT cargo INTO tipo_usuario FROM usuario WHERE id = NEW. usuario_id;
+
+    SET limite = CASE
+        WHEN tipo_usuario = 'estudante graduacao' THEN 4
+        WHEN tipo_usuario = 'publico externo' THEN 2
+        WHEN tipo_usuario IN ('professor', 'funcionario', 'estudante pos-graduacao', 'aluno pesquisa/extensao') THEN 5
+        ELSE 0
+    END; 
+
+    IF qtd >= limite THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário atingiu o limite de empréstimos.';
+    END IF;
+END;
+//
+DELIMITER ;
 EOF
-echo "Usuários e Tabelas criadas!"
+echo "Usuários, Tabelas e Triggers criados!"
