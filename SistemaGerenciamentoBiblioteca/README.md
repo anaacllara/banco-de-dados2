@@ -26,7 +26,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 ## 3. Modelagem de Dados
 
 ### 3.1 Diagrama Entidade-Relacionamento (ER)
-> <img src="/SistemaGerenciamentoBiblioteca/Diagrama ER.png" alt="Diagrama Sistema de Gerenciamento Biblioteca">
+> <img src="/SistemaGerenciamentoBiblioteca/Diagrama ER.png" width= "750" height="350" alt="Diagrama Sistema de Gerenciamento Biblioteca">
 
 ### 3.2 Descrição das Tabelas
 
