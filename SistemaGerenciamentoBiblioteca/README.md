@@ -130,11 +130,11 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 ### ⚠️ Triggers 
 ### Tabela `emprestimo`
 #### trg_bloquear_multa
-> **Objetivo:** Impedir que um usuário com multa pendente realize empréstimo. 
+> **Objetivo:** Impedir que um usuário com multa pendente realize empréstimo.                         
 >**Tipo:** BEFORE INSERT 
 
 #### trg_limite_emprestimo
-> **Objetivo:** Verifica se o usuário já atingiu o limite de empréstimos.  
+> **Objetivo:** Verifica se o usuário já atingiu o limite de empréstimos.             
 >**Tipo:** BEFORE INSERT
 
 ---
