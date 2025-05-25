@@ -1,4 +1,5 @@
 # Documentação do Banco de Dados
+> **Nota:** As informações sobre nome de usuários, e-mail e outros dados nesta documentação são **estritamente fictícios** e utilizados somente para fins acadêmicos e ilustrativos.  
 
 ## 1. Objetivo do Sistema de Gerenciamento de Biblioteca
 É um sistema para universidades. Ele registra informações sobre livros, autores, usuários, empréstimos, reservas, histórico de empréstimos e devoluções. 
@@ -44,8 +45,8 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador do livro | PK, AUTO_INCREMENT, UNIQUE |
-| cdd_cod       | VARCHAR(20)   | Chave estrangeira da tabela cdd         | FK, NOT NULL           |
+| id            | INT           | Identificador do Livro | PK, AUTO_INCREMENT, UNIQUE |
+| cdd_cod       | VARCHAR(20)   | Chave estrangeira da tabela `cdd`         | FK, NOT NULL           |
 | isbn          | VARCHAR(14)   | Padrão internacional de numeração de livros          | UNIQUE           |
 | titulo        | VARCHAR(500)  | Título do Livro   | NOT NULL                 |
 | ano_publicacao| DATE          | Ano da Publicaçao do Livro | NOT NULL|
@@ -59,7 +60,7 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador do autor | PK, AUTO_INCREMENT, UNIQUE |
+| id            | INT           | Identificador do Autor | PK, AUTO_INCREMENT, UNIQUE |
 | nome          | VARCHAR(250)  | Nome do Autor          | NOT NULL            |
 | nascionalidade| VARCHAR(100)  | Nascionalidade do Autor| NOT NULL            |
 | dt_nascimento | DATE          | Data de nascimento do Autor   | NOT NULL     |
@@ -70,8 +71,8 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id_livro      | INT           | Chave estrangeira da tabela Livro | FK |
-| id_autor      | INT           | Chave estrangeira da tabela Autor | FK |
+| id_livro      | INT           | Chave estrangeira da tabela `livro` | FK |
+| id_autor      | INT           | Chave estrangeira da tabela `autor` | FK |
 
 ---
 #### 🗂️ Tabela: `usuário`
@@ -79,11 +80,11 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
-| id            | INT           | Identificador do usuário| PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
+| id            | INT           | Identificador do Usuário| PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
 | nome          | VARCHAR(200)  | Nome do Usuário        | NOT NULL            |
 | email         | VARCHAR(200)  | Email do Usuário       | NOT NULL, UNIQUE    |
-| telefone      | VARCHAR(15)   | Número de telefone do Usuári | NOT NULL, UNIQUE |
-| dt_cadastro   | DATE          | Data do Cadastro do Usuário | NOT NULL|
+| telefone      | VARCHAR(15)   | Número de telefone do Usuário | NOT NULL, UNIQUE |
+| dt_cadastro   | DATE          | Data do cadastro do Usuário | NOT NULL|
 | cargo         | ENUM('estudante graduacao', 'estudante pos-graduacao', 'aluno pesquisa/extensao', 'publico externo', 'funcionario', 'professor')| Ocupação do usuário | NOT NULL|
 
 ---
@@ -93,15 +94,15 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
 | id            | INT           | Identificador do Empréstimo | PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
-| usuario_id    | INT           | Chave estrangeira da tabela Usuário | FK, NOT NULL |
-| livro_id      | INT           | Chave estrangeira da tabela Livro   | FK, NOT NULL|
-| dt_emprestimo | DATETIME      | Data do empréstimo do livro | NOT NULL       |
+| usuario_id    | INT           | Chave estrangeira da tabela `usuário` | FK, NOT NULL |
+| livro_id      | INT           | Chave estrangeira da tabela `livro`   | FK, NOT NULL|
+| dt_emprestimo | DATETIME      | Data do empréstimo do Livro | NOT NULL       |
 | dt_devolucao_prevista| DATETIME   | Data da devolução prevista | NOT NULL|
 | dt_devolucao_real| DATETIME   | Data devolução real, se houver renovação do emprestimo   | NOT NULL|
 | status        | ENUM('em andamento', 'devolvido', 'renovado', 'atrasado')| Situação que se encontra o empréstimo do livro | NOT NULL |
-| observação    | VARCHAR(250)  | Observação sobre o estado do livro antes e depois do empréstimo | NOT NULL |
+| observação    | VARCHAR(250)  | Observação sobre o estado do livro antes e depois do Empréstimo | NOT NULL |
 | multa         | DECIMAL(6,2)  | Multa a ser aplicada caso haja atraso | DEFAULT/EXPRESSION 0.00 |
-| renovacao     | INT           | Número de vezes que o empréstimo foi renovado | NOT NULL, DEFAULT 0 | 
+| renovacao     | INT           | Número de vezes que o Empréstimo foi renovado | NOT NULL, DEFAULT 0 | 
 
 ---
 #### 🗂️ Tabela: `reserva`
@@ -110,8 +111,8 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 | Coluna        | Tipo          | Descrição              | Restrições         |
 |---------------|---------------|------------------------|---------------------|
 | id            | INT           | Identificador da reserva| PK, NOT NULL, AUTO_INCREMENT, UNIQUE |
-| livro_id      | INT           | Chave estrangeira da tabela livro | FK, NOT NULL|
-| usuario_id    | INT           | Chave estrangeira da tabela usuario | FK, NOT NULL |
+| livro_id      | INT           | Chave estrangeira da tabela `livro` | FK, NOT NULL|
+| usuario_id    | INT           | Chave estrangeira da tabela `usuario` | FK, NOT NULL |
 | dt_reserva    | DATE          | Data em que a reserva foi efetuada   | NOT NULL  |
 | status        | ENUM('ativa', 'efetivada', 'expirada', 'cancelada', 'sem reserva')| Status da reserva| NOT NULL|
 | dt_expiracao  | DATETIME      | Data em que a reserva expira| NOT NULL|
@@ -129,11 +130,11 @@ Além de possuir usuários criados em servidor Linux Ubuntu, por meio de scripts
 ---
 ### ⚠️ Triggers 
 ### Tabela `emprestimo`
-#### trg_bloquear_multa
+#### `trg_bloquear_multa`
 > **Objetivo:** Impedir que um usuário com multa pendente realize empréstimo.                         
 >**Tipo:** BEFORE INSERT 
 
-#### trg_limite_emprestimo
+#### `trg_limite_emprestimo`
 > **Objetivo:** Verifica se o usuário já atingiu o limite de empréstimos.             
 >**Tipo:** BEFORE INSERT
 
